@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="calculator">
+        <h1 class="calculator-title">Kalkulator</h1>
+        <input type="text" class="display" id="display" readonly>
+        
+        <div class="buttons">
+            <button class="btn-clear" onclick="clearDisplay()">C</button>
+            <button class="btn-clear" onclick="deleteLast()">⌫</button>
+            <button class="btn-operator" onclick="appendToDisplay('/')">/</button>
+            <button class="btn-operator" onclick="appendToDisplay('*')">×</button>
+            
+            <button class="btn-number" onclick="appendToDisplay('7')">7</button>
+            <button class="btn-number" onclick="appendToDisplay('8')">8</button>
+            <button class="btn-number" onclick="appendToDisplay('9')">9</button>
+            <button class="btn-operator" onclick="appendToDisplay('-')">-</button>
+            
+            <button class="btn-number" onclick="appendToDisplay('4')">4</button>
+            <button class="btn-number" onclick="appendToDisplay('5')">5</button>
+            <button class="btn-number" onclick="appendToDisplay('6')">6</button>
+            <button class="btn-operator" onclick="appendToDisplay('+')">+</button>
+            
+            <button class="btn-number" onclick="appendToDisplay('1')">1</button>
+            <button class="btn-number" onclick="appendToDisplay('2')">2</button>
+            <button class="btn-number" onclick="appendToDisplay('3')">3</button>
+            <button class="btn-number" onclick="appendToDisplay('0')" style="grid-row: span 2;">0</button>
+            
+            <button class="btn-number" onclick="appendToDisplay('.')">.</button>
+            <button class="btn-equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let currentInput = '';
+        let operator = '';
+        let previousInput = '';
+        let shouldResetDisplay = false;
+
+        function appendToDisplay(value) {
+            if (shouldResetDisplay) {
+                display.value = '';
+                shouldResetDisplay = false;
+            }
+
+            // Mencegah input operator berturut-turut
+            if (['+', '-', '*', '/'].includes(value)) {
+                if (display.value === '' || ['+', '-', '*', '/'].includes(display.value.slice(-1))) {
+                    return;
+                }
+            }
+
+            // Mencegah multiple decimal points
+            if (value === '.') {
+                let parts = display.value.split(/[\+\-\*\/]/);
+                let lastPart = parts[parts.length - 1];
+                if (lastPart.includes('.')) {
+                    return;
+                }
+            }
+
+            display.value += value;
+        }
+
+        function clearDisplay() {
+            display.value = '';
+            currentInput = '';
+            operator = '';
+            previousInput = '';
+            shouldResetDisplay = false;
+        }
+
+        function deleteLast() {
+            display.value = display.value.slice(0, -1);
+        }
+
+        function calculate() {
+            try {
+                if (display.value === '') {
+                    return;
+                }
+
+                // Mengganti × dengan * untuk evaluasi
+                let expression = display.value.replace(/×/g, '*');
+                
+                // Evaluasi ekspresi matematika
+                let result = eval(expression);
+                
+                // Membulatkan hasil jika perlu
+                if (result % 1 !== 0) {
+                    result = parseFloat(result.toFixed(8));
+                }
+                
+                display.value = result;
+                shouldResetDisplay = true;
+                
+                // Animasi sukses
+                display.style.background = 'rgba(0, 210, 211, 0.3)';
+                setTimeout(() => {
+                    display.style.background = 'rgba(0, 0, 0, 0.3)';
+                }, 300);
+                
+            } catch (error) {
+                display.value = 'Error';
+                shouldResetDisplay = true;
+                
+                // Animasi error
+                display.style.background = 'rgba(255, 107, 107, 0.3)';
+                setTimeout(() => {
+                    display.style.background = 'rgba(0, 0, 0, 0.3)';
+                }, 300);
+            }
+        }
+
+        // Dukungan keyboard
+        document.addEventListener('keydown', function(event) {
+            const key = event.key;
+            
+            if (key >= '0' && key <= '9' || key === '.') {
+                appendToDisplay(key);
+            } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+                appendToDisplay(key);
+            } else if (key === 'Enter' || key === '=') {
+                event.preventDefault();
+                calculate();
+            } else if (key === 'Escape' || key === 'c' || key === 'C') {
+                clearDisplay();
+            } else if (key === 'Backspace') {
+                deleteLast();
+            }
+        });
+
+        // Fokus pada kalkulator saat halaman dimuat
+        window.addEventListener('load', function() {
+            document.body.focus();
+        });
+    </script>
+</body>
+</html>
